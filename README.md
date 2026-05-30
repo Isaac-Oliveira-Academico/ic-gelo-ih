@@ -89,4 +89,4 @@ Próximos passos desejados:
 6. Criar visualizações de defeitos simples, como vacância.
 7. Preparar base futura para LAMMPS e Quantum ESPRESSO.
 
-8. ### Gelo Ih
+### Gelo Ih
