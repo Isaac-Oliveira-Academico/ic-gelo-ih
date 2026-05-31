@@ -39,6 +39,7 @@ from src.version import APP_VERSION
 STRUCTURES_DIR = PROJECT_ROOT / "structures"
 TEMPLATES_DIR  = PROJECT_ROOT / "templates"
 FIGURES_DIR    = PROJECT_ROOT / "figures"
+DOCS_DIR       = PROJECT_ROOT / "docs"
 
 PERFECT_CIF = (
     STRUCTURES_DIR
@@ -57,6 +58,11 @@ TEMPLATE_HTML = (
 
 OUTPUT_HTML = (
     FIGURES_DIR
+    / "gelo_ih_visualizador.html"
+)
+
+OUTPUT_HTML = (
+    DOCS_DIR 
     / "index.html"
 )
 
@@ -187,6 +193,7 @@ def main():
             raise FileNotFoundError(f"CIF nao encontrado: {p}")
 
     FIGURES_DIR.mkdir(exist_ok=True)
+    DOCS_DIR.mkdir(parents=True,exist_ok=True)
 
     perfect = read(PERFECT_CIF)
     vacancy = read(VACANCY_CIF)
