@@ -57,7 +57,7 @@ TEMPLATE_HTML = (
 
 OUTPUT_HTML = (
     FIGURES_DIR
-    / "gelo_ih_visualizador.html"
+    / "index.html"
 )
 
 OUTPUT_JSON = (
