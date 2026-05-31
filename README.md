@@ -1,92 +1,222 @@
-# IC Gelo Ih
+IC Gelo Ih
+Repositório inicial de uma Iniciação Científica em Física Computacional e
+Ciência dos Materiais, com foco introdutório na estrutura molecular e
+cristalina do gelo Ih.
 
-Repositório inicial da Iniciação Científica em Física Computacional e Ciência dos Materiais, com foco introdutório na estrutura molecular/cristalina do gelo Ih.
+O projeto tem caráter educacional e científico. A proposta é construir,
+passo a passo, uma base computacional para compreender coordenadas atômicas,
+moléculas de água, células unitárias, redes cristalinas, periodicidade,
+supercélulas, visualização 3D e, futuramente, defeitos cristalinos.
 
-## Objetivo
+Contexto
+Este projeto é desenvolvido como parte de uma Iniciação Científica no
+Bacharelado em Física da Universidade Federal de Catalão (UFCAT), sob
+orientação do Prof. Domingos Lopes da Silva Jr.
 
-Construir um ambiente computacional remoto para estudar, programar e visualizar estruturas relacionadas ao gelo Ih usando Python.
+A linha geral envolve:
 
-## Arquitetura Computacional
-CLOUD
+Física Computacional;
+Ciência dos Materiais;
+Matéria Condensada;
+estrutura cristalina do gelo Ih;
+visualização científica;
+dinâmica molecular em etapas futuras;
+defeitos cristalinos em etapas futuras.
+Objetivo
+Construir uma plataforma inicial em Python para estudar estruturas relacionadas
+ao gelo Ih, começando por modelos didáticos e evoluindo progressivamente para
+representações mais próximas de sistemas usados em pesquisa computacional de
+materiais.
 
-Estou desenvolvendo uma Iniciação Científica em Física Computacional e Ciência dos Materiais, com foco inicial em estrutura molecular/cristalina do gelo Ih, orientada pelo Prof. Domingos Lopes da Silva Jr. O objetivo inicial é demonstrar capacidade computacional: configurar ambiente remoto, versionar código, gerar coordenadas moleculares e visualizar uma estrutura 3D simples em Python.
+Os objetivos iniciais são:
 
-Infraestrutura configurada:
-- MacBook como estação principal.
-- VSCode conectado via Remote SSH ao servidor Latitude.
-- Latitude hostname: aivgo-tech.
-- Latitude LAN IP: 192.168.0.105.
-- Latitude Tailscale IP: 100.99.53.125.
-- Cofre no Latitude: /mnt/cofre/dados.
-- G7Node hostname: aivgo-g7node.
-- G7Node usado como nó de execução.
-- GPU do G7Node: NVIDIA GeForce GTX 1050 Ti, 4 GB VRAM.
-- Driver NVIDIA: 535.309.01.
-- CUDA runtime reportado por nvidia-smi: 12.2.
-- Python no G7Node: 3.12.3.
+gerar estruturas moleculares simples;
+salvar coordenadas atômicas em formatos científicos;
+visualizar estruturas em 3D;
+construir células hexagonais;
+estudar periodicidade;
+gerar supercélulas;
+preparar a base para estudos futuros de defeitos e dinâmica molecular.
+Ambiente Computacional
+O projeto foi desenvolvido em ambiente Linux remoto, acessado via VSCode Remote
+SSH, com execução dos scripts em ambiente virtual Python.
 
-Fluxo operacional:
-- Edito arquivos no VSCode via SSH no Latitude.
-- Projeto no Latitude: /mnt/cofre/dados/startup-cientifica/ic-gelo-ih.
-- No G7Node, o cofre do Latitude foi montado via SSHFS em:
-  /home/vingo/latitude-dados.
-- Caminho do projeto no G7Node:
-  /home/vingo/latitude-dados/startup-cientifica/ic-gelo-ih.
-- Comando de montagem usado no G7Node:
-  sshfs vingo@100.99.53.125:/mnt/cofre/dados ~/latitude-dados -o reconnect,ServerAliveInterval=15,ServerAliveCountMax=3.
+Configuração geral:
 
-Ambiente Python:
-- venv criada localmente no G7Node em:
-  ~/.venvs/ic-gelo-ih.
-- Para ativar:
-  source ~/.venvs/ic-gelo-ih/bin/activate.
-- Dependências instaladas:
-  numpy, matplotlib, ase, scipy e dependências do requirements.txt.
+Python 3.12;
+ambiente virtual Python;
+NumPy;
+Matplotlib;
+ASE;
+Plotly;
+SciPy;
+GPU NVIDIA disponível para etapas futuras de simulação.
+Por segurança, detalhes privados de rede, usuários, IPs, chaves, caminhos
+internos e comandos de montagem remota não são publicados neste repositório.
 
-Repositório:
-- Nome: ic-gelo-ih.
-- GitHub: https://github.com/Isaac-Oliveira-Academico/ic-gelo-ih.
-- Branch principal: main.
-- Commits importantes:
-  - Configura ambiente inicial da IC e visualizacao molecular.
-  - Adiciona primeira visualizacao molecular do gelo.
-  - Documenta setup inicial da IC.
-  - Integra repositório local com GitHub.
-
-Estrutura do projeto:
+Estrutura do Projeto
 ic-gelo-ih/
 ├── README.md
-├── .gitignore
 ├── requirements.txt
 ├── data/
 │   └── rede_gelo_inicial.xyz
+├── docs/
 ├── figures/
-│   └── rede_gelo_inicial.png
 ├── notes/
-│   └── 00_setup_inicial.md
-├── runs/
-└── scripts/
-    └── 01_plot_rede_inicial.py
+├── scripts/
+├── structures/
+└── tests/
+Scripts Desenvolvidos
+01 — Rede molecular inicial
+Gera uma rede molecular 3D simplificada inspirada no gelo Ih.
 
-Primeiro resultado:
-- scripts/01_plot_rede_inicial.py gera uma rede molecular 3D simplificada inspirada no gelo Ih.
-- Saídas:
-  data/rede_gelo_inicial.xyz
-  figures/rede_gelo_inicial.png.
-- Importante: a estrutura ainda não é cristalograficamente rigorosa; é um exercício inicial para entender coordenadas atômicas, moléculas de água, visualização 3D e fluxo computacional.
+Saídas principais:
 
-Como executar no G7Node:
-cd ~/latitude-dados/startup-cientifica/ic-gelo-ih
-source ~/.venvs/ic-gelo-ih/bin/activate
-python scripts/01_plot_rede_inicial.py
+data/rede_gelo_inicial.xyz;
+figures/rede_gelo_inicial.png.
+Observação: esta estrutura é didática e ainda não é cristalograficamente
+rigorosa.
 
-Próximos passos desejados:
-1. Melhorar o README para reprodução por terceiros.
-2. Criar script 02 para ler e validar arquivos XYZ com ASE.
-3. Exportar estruturas em formatos úteis para visualizadores científicos.
-4. Construir uma célula hexagonal aproximada do gelo Ih.
-5. Estudar redes de Bravais, célula unitária e parâmetros cristalográficos.
-6. Criar visualizações de defeitos simples, como vacância.
-7. Preparar base futura para LAMMPS e Quantum ESPRESSO.
+02 — Validação de XYZ com ASE
+Lê o arquivo XYZ inicial usando ASE, mostra o número de átomos, identifica
+espécies químicas e calcula distâncias interatômicas.
 
-### Gelo Ih
+Conceitos estudados:
+
+objeto Atoms do ASE;
+espécies químicas;
+coordenadas cartesianas;
+distâncias interatômicas.
+03 — Exportação de formatos
+Exporta a estrutura inicial para formatos usados em visualização e
+cristalografia computacional.
+
+Formatos gerados:
+
+XYZ;
+PDB;
+CIF.
+04 — Célula hexagonal simples
+Cria uma célula hexagonal didática com vetores de rede e periodicidade.
+
+Conceitos estudados:
+
+célula unitária;
+vetores de rede;
+coordenadas fracionárias;
+simetria hexagonal;
+pbc=True.
+05 — Visualização interativa da célula
+Gera um arquivo HTML interativo para visualizar a célula hexagonal no navegador.
+
+Resultado:
+
+rotação com mouse;
+zoom;
+inspeção visual dos vetores e pontos da base.
+06 — Supercélula hexagonal
+Repete a célula hexagonal para formar uma supercélula.
+
+Conceitos estudados:
+
+repetição periódica;
+crescimento do número de átomos;
+diferença entre célula unitária e supercélula.
+07 — Visualização interativa da supercélula
+Gera uma visualização HTML interativa da supercélula hexagonal.
+
+08 — Condições periódicas de contorno
+Demonstra a ideia de que, em sistemas periódicos, uma partícula que sai por uma
+face da célula reaparece pela face oposta.
+
+Conceito central:
+
+sai por um lado, entra pelo outro
+08b — Animação de PBC
+Gera uma animação HTML mostrando uma partícula cruzando a fronteira da célula e
+reaparecendo na posição equivalente.
+
+09 — Gelo Ih aproximado
+Cria um primeiro modelo didático de gelo Ih, combinando:
+
+moléculas de água;
+célula hexagonal;
+periodicidade;
+visualização interativa.
+Observação: o modelo ainda é aproximado e educacional. Ele não deve ser tratado
+como estrutura cristalográfica final do gelo Ih.
+
+10 — Supercélula do gelo Ih aproximado
+Repete o modelo aproximado do gelo Ih para construir um sistema molecular maior,
+preparando o projeto para estudos de vacâncias e defeitos pontuais.
+
+Como Executar
+Clone o repositório:
+
+git clone https://github.com/Isaac-Oliveira-Academico/ic-gelo-ih.git
+cd ic-gelo-ih
+Crie e ative um ambiente virtual:
+
+python3 -m venv .venv
+source .venv/bin/activate
+Instale as dependências:
+
+pip install -r requirements.txt
+Execute um script, por exemplo:
+
+python scripts/09_gelo_ih_aproximado.py
+Os arquivos de saída são gerados principalmente em:
+
+structures/;
+figures/;
+data/.
+Resultados Atuais
+O projeto já permite:
+
+gerar uma rede molecular inicial;
+validar estruturas com ASE;
+exportar arquivos XYZ, PDB e CIF;
+construir uma célula hexagonal simples;
+gerar supercélulas;
+visualizar estruturas em HTML interativo;
+demonstrar condições periódicas de contorno;
+criar um modelo didático aproximado do gelo Ih.
+Aprendizado Científico
+Até esta etapa, o projeto documenta conceitos fundamentais para Física
+Computacional aplicada à Ciência dos Materiais:
+
+coordenadas atômicas;
+molécula de água;
+formatos de arquivos atomísticos;
+célula unitária;
+vetores de rede;
+coordenadas fracionárias;
+periodicidade;
+supercélulas;
+visualização científica;
+modelo molecular aproximado do gelo Ih.
+Próximos Passos
+Próximas etapas planejadas:
+
+criar uma supercélula maior do gelo Ih aproximado;
+inserir uma vacância molecular;
+visualizar defeitos pontuais;
+exportar estruturas para LAMMPS;
+estudar potenciais interatômicos;
+comparar modelos didáticos com dados cristalográficos reais;
+preparar a base para dinâmica molecular.
+Observação Sobre Segurança
+Este repositório não publica detalhes privados de infraestrutura, como:
+
+endereços IP;
+usuários de servidores;
+caminhos internos de armazenamento;
+comandos de montagem remota;
+tokens;
+senhas;
+chaves SSH.
+Essas informações devem permanecer em documentação privada local.
+
+Licença
+Este projeto está em fase inicial de desenvolvimento acadêmico. A licença será
+definida em etapa posterior.
