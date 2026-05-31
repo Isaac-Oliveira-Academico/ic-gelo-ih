@@ -1,0 +1,75 @@
+Etapa 11 — Vacancia Molecular no Gelo Ih Aproximado
+Etapa 1 — Conceito fisico
+Uma vacancia e um defeito pontual em que uma entidade estrutural esperada esta
+ausente. Em cristais atomicos simples, isso pode ser a ausencia de um atomo. Em
+um cristal molecular, como o gelo, uma vacancia molecular pode ser representada
+pela ausencia de uma molecula inteira de agua.
+
+Nesta etapa, removemos uma molecula H2O da supercelula do gelo Ih aproximado.
+Isso cria um vazio local na estrutura, permitindo visualizar a ideia de defeito
+pontual.
+
+Este ainda e um modelo didatico. Um estudo fisico mais rigoroso exigiria
+relaxacao estrutural, potencial interatomico adequado e analise energetica.
+
+Etapa 2 — Implementacao computacional
+O script 11_vacancia_gelo_ih.py:
+
+le structures/supercelula_gelo_ih_3x3x2.cif;
+identifica moleculas assumindo a ordem O, H, H;
+escolhe a molecula mais proxima do centro da supercelula;
+remove os tres atomos dessa molecula;
+salva a estrutura defeituosa;
+gera uma visualizacao HTML com a vacancia destacada.
+Arquivos gerados:
+
+structures/gelo_ih_vacancia.xyz;
+structures/gelo_ih_vacancia.cif;
+figures/gelo_ih_vacancia_interativa.html.
+Etapa 3 — Como executar
+No G7Node:
+
+cd ~/latitude-dados/startup-cientifica/ic-gelo-ih
+source ~/.venvs/ic-gelo-ih/bin/activate
+python scripts/11_vacancia_gelo_ih.py
+Depois abra:
+
+figures/gelo_ih_vacancia_interativa.html
+Etapa 4 — Explicacao do codigo
+INPUT_CIF = Path("structures/supercelula_gelo_ih_3x3x2.cif")
+Define a supercelula de entrada.
+
+molecule_indices(atoms)
+Agrupa atomos em moleculas H2O, assumindo a ordem O, H, H.
+
+choose_central_molecule(atoms)
+Escolhe a molecula cujo oxigenio esta mais proximo do centro geometrico da
+supercelula.
+
+del defective[group]
+Remove os tres atomos da molecula escolhida.
+
+write(OUTPUT_CIF, defective)
+Salva a estrutura com vacancia.
+
+add_vacancy_marker(...)
+Marca visualmente a regiao onde a molecula foi removida.
+
+Etapa 5 — Melhorias futuras
+Melhorias importantes:
+
+calcular vizinhos ao redor da vacancia;
+comparar estrutura antes e depois;
+relaxar a estrutura com potencial interatomico;
+calcular energia de formacao da vacancia;
+gerar varias vacancias em posicoes diferentes;
+exportar a estrutura defeituosa para LAMMPS.
+Etapa 6 — Conexao com pesquisa cientifica real
+Defeitos cristalinos influenciam propriedades mecanicas, transporte, difusao e
+plasticidade. No gelo Ih, defeitos e desordem orientacional sao temas relevantes
+para entender comportamento mecanico e resposta sob deformacao.
+
+Esta etapa conecta diretamente o projeto a um tema de pesquisa em Ciencia dos
+Materiais:
+
+estrutura cristalina -> supercelul
