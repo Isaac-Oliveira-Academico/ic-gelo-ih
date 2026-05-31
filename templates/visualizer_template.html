@@ -1,0 +1,741 @@
+# ── Template HTML ──────────────────────────────────────────────────────────────
+HTML_TEMPLATE = """\
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=5.0,user-scalable=yes">
+<meta name="description" content="Visualizador cristalografico — Gelo Ih com vacancia molecular. IC UFCAT.">
+<title>Gelo Ih — Visualizador Cristalografico · UFCAT</title>
+<script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+/* ── Reset ── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+
+/* ── Tokens ── */
+:root{
+  --bg:         #06090e;
+  --surf:       #0b1219;
+  --surf2:      #101a26;
+  --border:     #1a2d42;
+  --border2:    #243d57;
+  --acc:        #00c8ff;
+  --acc2:       #ff3d5a;
+  --gold:       #ffd54f;
+  --text:       #c8d8e8;
+  --dim:        #4a6a88;
+  --dim2:       #7a9ab8;
+  --r:          6px;
+  --font-ui:    'JetBrains Mono', monospace;
+  --font-title: 'Syne', sans-serif;
+  --header-h:   52px;
+  --footer-h:   44px;
+  --tab-h:      36px;
+}
+
+/* ── Body layout ── */
+body{
+  font-family:var(--font-ui);
+  background:var(--bg);
+  color:var(--text);
+  font-size:12px;
+  line-height:1.4;
+  min-height:100dvh;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+}
+@media(max-width:700px){
+  body{overflow:auto}
+}
+
+/* ── HEADER ── */
+#hdr{
+  height:var(--header-h);
+  background:var(--surf);
+  border-bottom:1px solid var(--border);
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:0 16px;
+  flex-shrink:0;
+  flex-wrap:wrap;
+}
+#hdr-title{
+  flex:1;
+  min-width:160px;
+}
+#hdr-title h1{
+  font-family:var(--font-title);
+  font-size:15px;
+  font-weight:800;
+  color:var(--acc);
+  letter-spacing:.06em;
+  text-transform:uppercase;
+  white-space:nowrap;
+}
+#hdr-title p{
+  font-size:9px;
+  color:var(--dim);
+  margin-top:1px;
+}
+#hdr-badges{
+  display:flex;
+  gap:6px;
+  flex-wrap:wrap;
+}
+.badge{
+  background:var(--surf2);
+  border:1px solid var(--border);
+  border-radius:3px;
+  padding:3px 8px;
+  font-size:9px;
+  color:var(--dim2);
+  white-space:nowrap;
+}
+.badge b{color:var(--acc);font-weight:500}
+
+/* ── MAIN AREA ── */
+#main{
+  flex:1;
+  display:grid;
+  /* Desktop: dois paineis lado a lado */
+  grid-template-columns:1fr 1fr;
+  grid-template-rows:1fr;
+  gap:2px;
+  background:var(--border);
+  /* altura = viewport - header - footer */
+  height:calc(100dvh - var(--header-h) - var(--footer-h));
+  min-height:0;
+}
+
+/* Tablet: empilhado */
+@media(max-width:860px) and (min-width:501px){
+  #main{
+    grid-template-columns:1fr;
+    grid-template-rows:1fr 1fr;
+    height:auto;
+    min-height:calc(100dvh - var(--header-h) - var(--footer-h) - var(--tab-h));
+  }
+}
+
+/* Mobile: painel unico com tabs */
+@media(max-width:500px){
+  #main{
+    grid-template-columns:1fr;
+    grid-template-rows:1fr;
+    height:calc(100dvh - var(--header-h) - var(--footer-h) - var(--tab-h));
+  }
+  #panel-vacancy{display:none}
+  #panel-perfect{display:flex}
+  body.show-vacancy #panel-vacancy{display:flex}
+  body.show-vacancy #panel-perfect{display:none}
+}
+
+/* ── TABS (mobile only) ── */
+#tabs{
+  display:none;
+  height:var(--tab-h);
+  background:var(--surf);
+  border-bottom:1px solid var(--border);
+  flex-shrink:0;
+}
+@media(max-width:500px){
+  #tabs{display:flex}
+}
+.tab-btn{
+  flex:1;
+  background:none;
+  border:none;
+  border-bottom:2px solid transparent;
+  color:var(--dim2);
+  font-family:var(--font-ui);
+  font-size:10px;
+  font-weight:500;
+  letter-spacing:.06em;
+  text-transform:uppercase;
+  cursor:pointer;
+  transition:color .15s,border-color .15s;
+  padding:0 8px;
+}
+.tab-btn.active{
+  color:var(--acc);
+  border-bottom-color:var(--acc);
+}
+.tab-btn.vac.active{
+  color:var(--acc2);
+  border-bottom-color:var(--acc2);
+}
+
+/* ── PAINEIS ── */
+.panel{
+  background:var(--bg);
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+  position:relative;
+  min-height:0;
+}
+
+.panel-hdr{
+  height:30px;
+  background:var(--surf);
+  border-bottom:1px solid var(--border);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 12px;
+  flex-shrink:0;
+}
+.panel-name{
+  font-family:var(--font-title);
+  font-size:10px;
+  font-weight:700;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+}
+.panel-name.pf{color:var(--acc)}
+.panel-name.vc{color:var(--acc2)}
+.panel-meta{font-size:9px;color:var(--dim)}
+
+.plot-wrap{
+  flex:1;
+  position:relative;
+  min-height:0;
+}
+.plot-div{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+}
+
+/* ── VACANCY BADGE ── */
+#vac-badge{
+  position:absolute;
+  top:36px;
+  right:10px;
+  background:rgba(255,213,79,.1);
+  border:1px solid var(--gold);
+  border-radius:3px;
+  padding:3px 9px;
+  font-size:9px;
+  color:var(--gold);
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  pointer-events:none;
+  z-index:5;
+}
+
+/* ── ATOM INFO CARD ── */
+.atom-card{
+  position:absolute;
+  bottom:44px;
+  left:10px;
+  background:var(--surf);
+  border:1px solid var(--border);
+  border-left:3px solid var(--acc);
+  border-radius:var(--r);
+  padding:9px 12px;
+  font-size:10px;
+  min-width:170px;
+  display:none;
+  z-index:10;
+  pointer-events:none;
+  backdrop-filter:blur(4px);
+}
+.atom-card.show{display:block}
+.atom-card-title{
+  font-family:var(--font-title);
+  font-size:12px;
+  font-weight:700;
+  margin-bottom:5px;
+}
+.atom-row{
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  padding:2px 0;
+  border-bottom:1px solid var(--border);
+}
+.atom-row:last-child{border:none}
+.atom-key{color:var(--dim2)}
+.atom-val{color:var(--acc);font-weight:500}
+
+/* ── FOOTER ── */
+#ftr{
+  height:var(--footer-h);
+  background:var(--surf);
+  border-top:1px solid var(--border);
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:0 14px;
+  flex-shrink:0;
+  flex-wrap:wrap;
+  overflow:hidden;
+}
+#legend{
+  display:flex;
+  gap:12px;
+  flex:1;
+  flex-wrap:wrap;
+  overflow:hidden;
+}
+.leg-item{
+  display:flex;
+  align-items:center;
+  gap:5px;
+  font-size:9px;
+  color:var(--dim2);
+  white-space:nowrap;
+}
+.leg-dot{
+  width:9px;height:9px;
+  border-radius:50%;
+  border:1px solid rgba(255,255,255,.15);
+  flex-shrink:0;
+}
+.leg-line{
+  width:14px;height:2px;
+  flex-shrink:0;
+}
+#ctrls{display:flex;gap:6px;flex-shrink:0}
+.btn{
+  background:var(--surf2);
+  border:1px solid var(--border);
+  border-radius:3px;
+  padding:4px 10px;
+  color:var(--dim2);
+  font-family:var(--font-ui);
+  font-size:9px;
+  font-weight:500;
+  letter-spacing:.05em;
+  cursor:pointer;
+  transition:border-color .15s,color .15s,background .15s;
+  white-space:nowrap;
+}
+.btn:hover{border-color:var(--acc);color:var(--acc)}
+.btn.on{border-color:var(--acc);color:var(--acc);background:rgba(0,200,255,.07)}
+
+/* ── LOADING / ERROR ── */
+#loading{
+  position:fixed;inset:0;
+  background:var(--bg);
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  gap:16px;z-index:9999;
+}
+#loading h2{
+  font-family:var(--font-title);
+  font-size:18px;font-weight:800;
+  color:var(--acc);letter-spacing:.1em;
+  text-transform:uppercase;
+}
+#loading p{font-size:10px;color:var(--dim)}
+.spin{
+  width:32px;height:32px;
+  border:2px solid var(--border2);
+  border-top-color:var(--acc);
+  border-radius:50%;
+  animation:spin .7s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.err-box{
+  background:rgba(255,61,90,.07);
+  border:1px solid var(--acc2);
+  border-radius:var(--r);
+  padding:20px 24px;
+  max-width:400px;text-align:center;
+}
+.err-box h3{color:var(--acc2);font-family:var(--font-title);margin-bottom:8px}
+.err-box code{font-size:10px;color:var(--dim2);display:block;margin-top:6px}
+
+/* ── Scan lines atmosphere ── */
+body::after{
+  content:'';position:fixed;inset:0;
+  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.03) 2px,rgba(0,0,0,.03) 4px);
+  pointer-events:none;z-index:9998;
+}
+</style>
+</head>
+<body>
+
+<!-- Loading -->
+<div id="loading">
+  <div class="spin"></div>
+  <h2>Gelo I<sub style="font-size:12px">h</sub></h2>
+  <p>Renderizando estrutura cristalografica…</p>
+</div>
+
+<!-- Tabs (mobile only) -->
+<div id="tabs">
+  <button class="tab-btn active"     id="tab-pf" onclick="showTab('perfect')">Sem Defeito</button>
+  <button class="tab-btn vac"        id="tab-vc" onclick="showTab('vacancy')">Com Vacancia</button>
+</div>
+
+<!-- Header -->
+<div id="hdr">
+  <div id="hdr-title">
+    <h1>Gelo I<sub style="font-size:10px">h</sub> &mdash; Visualizador Cristalografico</h1>
+    <p>IC Fisica Computacional &middot; Prof. Domingos Lopes &middot; UFCAT &middot; Isaac Oliveira</p>
+  </div>
+  <div id="hdr-badges"></div>
+</div>
+
+<!-- Main -->
+<div id="main">
+
+  <!-- Painel perfeita -->
+  <div class="panel" id="panel-perfect">
+    <div class="panel-hdr">
+      <span class="panel-name pf">Sem Defeito</span>
+      <span class="panel-meta" id="meta-pf">&mdash;</span>
+    </div>
+    <div class="plot-wrap">
+      <div class="plot-div" id="plot-pf"></div>
+      <div class="atom-card" id="card-pf">
+        <div class="atom-card-title" id="card-pf-title">&mdash;</div>
+        <div id="card-pf-rows"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Painel vacancia -->
+  <div class="panel" id="panel-vacancy">
+    <div class="panel-hdr">
+      <span class="panel-name vc">Com Vacancia</span>
+      <span class="panel-meta" id="meta-vc">&mdash;</span>
+    </div>
+    <div class="plot-wrap">
+      <div class="plot-div" id="plot-vc"></div>
+      <div id="vac-badge">&#9674; vacancia detectada</div>
+      <div class="atom-card" id="card-vc">
+        <div class="atom-card-title" id="card-vc-title">&mdash;</div>
+        <div id="card-vc-rows"></div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- #main -->
+
+<!-- Footer -->
+<div id="ftr">
+  <div id="legend">
+    <div class="leg-item"><div class="leg-dot" style="background:#ff4444"></div>O (oxigenio)</div>
+    <div class="leg-item"><div class="leg-dot" style="background:#ddd;border-color:#555"></div>H (hidrogenio)</div>
+    <div class="leg-item"><div class="leg-line" style="background:#334d66"></div>Ligacao O-H</div>
+    <div class="leg-item"><div class="leg-line" style="background:#2266cc"></div>Celula</div>
+    <div class="leg-item"><div class="leg-dot" style="background:var(--gold);border-radius:2px;transform:rotate(45deg)"></div>Vacancia</div>
+  </div>
+  <div id="ctrls">
+    <button class="btn on" id="btn-h"     onclick="toggle('H')">H</button>
+    <button class="btn on" id="btn-bonds" onclick="toggle('bonds')">Ligacoes</button>
+    <button class="btn on" id="btn-cell"  onclick="toggle('cell')">Celula</button>
+    <button class="btn"    id="btn-cam"   onclick="resetCam()">&#8635; camera</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════ DATA INLINE ════════════════════════════ -->
+<script id="crystal-data" type="application/json">
+@@CRYSTAL_DATA@@
+</script>
+
+<!-- ═══════════════════════════════ APP LOGIC ═════════════════════════════ -->
+<script>
+// ── Camera inicial fixa ────────────────────────────────────────────────────
+// Angulo escolhido para mostrar a estrutura hexagonal do gelo Ih com a
+// vacancia visivel na abertura em qualquer dispositivo.
+const CAM = {
+  eye:    {x:1.55, y:1.55, z:1.05},
+  center: {x:0,    y:0,    z:0},
+  up:     {x:0,    y:0,    z:1},
+};
+
+// ── Estado global ──────────────────────────────────────────────────────────
+const vis = {H:true, bonds:true, cell:true};
+
+// Mapa de indices das traces por painel e tipo
+// Preenchido em renderPanel()
+const TI = {
+  pf: {cell:[], bonds:[], O:[], H:[]},
+  vc: {cell:[], bonds:[], O:[], H:[], marker:[]},
+};
+
+// ── Sincronizacao de camera ────────────────────────────────────────────────
+// Quando o usuario rota um painel, o outro acompanha.
+let syncLock = false;
+
+function syncCamera(sourceId, targetId) {
+  const src = document.getElementById(sourceId);
+  if (!src || syncLock) return;
+  src.on('plotly_relayout', function(ev) {
+    if (syncLock) return;
+    const cam = ev['scene.camera'];
+    if (!cam) return;
+    syncLock = true;
+    Plotly.relayout(targetId, {'scene.camera': cam})
+      .finally(() => { syncLock = false; });
+  });
+}
+
+// ── Layout Plotly ──────────────────────────────────────────────────────────
+function makeLayout() {
+  const axis = {
+    tickfont:       {color:'#3a5a78', size:9},
+    titlefont:      {color:'#3a5a78', size:9},
+    gridcolor:      '#111e2c',
+    zerolinecolor:  '#111e2c',
+    backgroundcolor:'rgba(0,0,0,0)',
+  };
+  return {
+    paper_bgcolor: 'rgba(0,0,0,0)',
+    plot_bgcolor:  'rgba(0,0,0,0)',
+    margin: {l:0, r:0, b:0, t:0},
+    showlegend: false,
+    scene: {
+      camera:   CAM,
+      aspectmode:'data',
+      xaxis: {...axis, title:{text:'x (A)'}},
+      yaxis: {...axis, title:{text:'y (A)'}},
+      zaxis: {...axis, title:{text:'z (A)'}},
+      bgcolor: 'rgba(0,0,0,0)',
+    },
+    hoverlabel: {
+      bgcolor:    '#0b1219',
+      bordercolor:'#1a2d42',
+      font: {family:'JetBrains Mono,monospace', size:11, color:'#c8d8e8'},
+    },
+  };
+}
+
+const PLOTLY_CFG = {
+  responsive:  true,
+  scrollZoom:  true,
+  displaylogo: false,
+  modeBarButtonsToRemove: ['toImage','sendDataToCloud','lasso2d','select2d'],
+};
+
+// ── Construtores de traces ─────────────────────────────────────────────────
+function cellTraces(edges) {
+  return edges.map(e => ({
+    type:'scatter3d', mode:'lines',
+    x:[e[0][0],e[1][0]], y:[e[0][1],e[1][1]], z:[e[0][2],e[1][2]],
+    line:{color:'#2266cc', width:3},
+    showlegend:false, hoverinfo:'skip',
+  }));
+}
+
+function bondTraces(bonds) {
+  // Une todas as ligacoes numa trace so (com null separador) para performance
+  const x=[],y=[],z=[];
+  bonds.forEach(b => {
+    x.push(b[0][0],b[1][0],null);
+    y.push(b[0][1],b[1][1],null);
+    z.push(b[0][2],b[1][2],null);
+  });
+  return [{
+    type:'scatter3d', mode:'lines',
+    x, y, z,
+    line:{color:'#2a4055', width:2},
+    showlegend:false, hoverinfo:'skip',
+  }];
+}
+
+function atomTraces(atoms) {
+  const Os = atoms.filter(a=>a.symbol==='O');
+  const Hs = atoms.filter(a=>a.symbol==='H');
+  const trO = {
+    type:'scatter3d', mode:'markers', name:'O',
+    x:Os.map(a=>a.x), y:Os.map(a=>a.y), z:Os.map(a=>a.z),
+    marker:{size:5, color:'#ff4444', line:{color:'rgba(0,0,0,.35)',width:.4}},
+    text:Os.map(a=>`<b>O</b> #${a.index}<br>x=${a.x.toFixed(3)} \u00c5<br>y=${a.y.toFixed(3)} \u00c5<br>z=${a.z.toFixed(3)} \u00c5`),
+    hovertemplate:'%{text}<extra></extra>',
+    showlegend:false,
+    customdata: Os.map(a=>a.index),
+  };
+  const trH = {
+    type:'scatter3d', mode:'markers', name:'H',
+    x:Hs.map(a=>a.x), y:Hs.map(a=>a.y), z:Hs.map(a=>a.z),
+    marker:{size:2.8, color:'#dddddd', line:{color:'rgba(0,0,0,.2)',width:.3}},
+    text:Hs.map(a=>`<b>H</b> #${a.index}<br>x=${a.x.toFixed(3)} \u00c5<br>y=${a.y.toFixed(3)} \u00c5<br>z=${a.z.toFixed(3)} \u00c5`),
+    hovertemplate:'%{text}<extra></extra>',
+    showlegend:false,
+    customdata: Hs.map(a=>a.index),
+  };
+  return {trO, trH};
+}
+
+function vacMarker(pos) {
+  return {
+    type:'scatter3d', mode:'markers+text',
+    x:[pos[0]], y:[pos[1]], z:[pos[2]],
+    marker:{size:12, color:'#ffd54f', symbol:'diamond', line:{color:'#000',width:2}, opacity:.9},
+    text:['vacancia'], textposition:'top center',
+    textfont:{color:'#ffd54f',size:11},
+    hovertemplate:`<b>Vacancia molecular</b><br>x=${pos[0].toFixed(3)} \u00c5<br>y=${pos[1].toFixed(3)} \u00c5<br>z=${pos[2].toFixed(3)} \u00c5<extra></extra>`,
+    showlegend:false,
+  };
+}
+
+// ── Painel de informacoes do atomo ─────────────────────────────────────────
+function showAtomCard(panelKey, sym, atomIndex, atoms) {
+  const prefix = panelKey === 'pf' ? 'pf' : 'vc';
+  const list = atoms.filter(a=>a.symbol===sym);
+  const atom = list[atomIndex];
+  if (!atom) return;
+
+  document.getElementById(`card-${prefix}-title`).textContent =
+    `${sym==='O'?'⬤':'○'} ${sym} — indice ${atom.index}`;
+
+  document.getElementById(`card-${prefix}-rows`).innerHTML = [
+    ['x', atom.x.toFixed(4)+' \u00c5'],
+    ['y', atom.y.toFixed(4)+' \u00c5'],
+    ['z', atom.z.toFixed(4)+' \u00c5'],
+    ['elemento', sym],
+  ].map(([k,v])=>`<div class="atom-row"><span class="atom-key">${k}</span><span class="atom-val">${v}</span></div>`).join('');
+
+  document.getElementById(`card-${prefix}`).classList.add('show');
+}
+
+// ── Render de um painel ────────────────────────────────────────────────────
+function renderPanel(divId, panelKey, structData, isVacancy) {
+  const ct = cellTraces(structData.cell_edges);
+  const bt = bondTraces(structData.bonds);
+  const {trO, trH} = atomTraces(structData.atoms);
+  const traces = [...ct, ...bt, trO, trH];
+  if (isVacancy) traces.push(vacMarker(structData.vacancy_position));
+
+  Plotly.newPlot(divId, traces, makeLayout(), PLOTLY_CFG);
+
+  // Registra indices
+  const base = ct.length + bt.length;
+  TI[panelKey].cell  = ct.map((_,i)=>i);
+  TI[panelKey].bonds = bt.map((_,i)=>ct.length+i);
+  TI[panelKey].O     = [base];
+  TI[panelKey].H     = [base+1];
+  if (isVacancy) TI[panelKey].marker = [base+2];
+
+  // Clique no atomo
+  const el = document.getElementById(divId);
+  el.on('plotly_click', ev => {
+    const pt = ev.points[0];
+    if (!pt || !pt.data.name) return;
+    const sym = pt.data.name;
+    if (sym !== 'O' && sym !== 'H') return;
+    showAtomCard(panelKey, sym, pt.pointIndex, structData.atoms);
+  });
+
+  // Duplo clique: fecha card e reseta camera
+  el.on('plotly_doubleclick', () => {
+    document.getElementById(`card-${panelKey}`).classList.remove('show');
+    Plotly.relayout(divId, {'scene.camera': CAM});
+  });
+}
+
+// ── Toggles ────────────────────────────────────────────────────────────────
+function toggle(key) {
+  vis[key] = !vis[key];
+  const on = vis[key];
+  const id = key==='H' ? 'btn-h' : key==='bonds' ? 'btn-bonds' : 'btn-cell';
+  document.getElementById(id).classList.toggle('on', on);
+
+  const panels = [{'id':'plot-pf','k':'pf'}, {'id':'plot-vc','k':'vc'}];
+  panels.forEach(p => {
+    const indices = TI[p.k][key==='H'?'H':key==='bonds'?'bonds':'cell'];
+    if (indices && indices.length)
+      Plotly.restyle(p.id, {visible: on}, indices);
+  });
+}
+
+// ── Reset camera ───────────────────────────────────────────────────────────
+function resetCam() {
+  Plotly.relayout('plot-pf', {'scene.camera': CAM});
+  Plotly.relayout('plot-vc', {'scene.camera': CAM});
+}
+
+// ── Tabs mobile ────────────────────────────────────────────────────────────
+function showTab(which) {
+  const body = document.body;
+  if (which === 'vacancy') {
+    body.classList.add('show-vacancy');
+    document.getElementById('tab-pf').classList.remove('active');
+    document.getElementById('tab-vc').classList.add('active');
+  } else {
+    body.classList.remove('show-vacancy');
+    document.getElementById('tab-pf').classList.add('active');
+    document.getElementById('tab-vc').classList.remove('active');
+  }
+  // Forca Plotly a recalcular tamanho apos visibilidade mudar
+  setTimeout(() => {
+    Plotly.Plots.resize('plot-pf');
+    Plotly.Plots.resize('plot-vc');
+  }, 50);
+}
+
+// ── Resize handler ─────────────────────────────────────────────────────────
+// Garante que o canvas Plotly recalcule ao rotar o celular
+let resizeTimer;
+window.addEventListener('resize', () => {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(() => {
+    Plotly.Plots.resize('plot-pf');
+    Plotly.Plots.resize('plot-vc');
+  }, 150);
+});
+
+// ── Header badges ──────────────────────────────────────────────────────────
+function fillBadges(data) {
+  const pm = data.perfect.metadata;
+  const vm = data.vacancy.metadata;
+  document.getElementById('hdr-badges').innerHTML = `
+    <div class="badge">perfeita <b>${pm.n_molecules} H\u2082O &middot; ${pm.n_atoms} at.</b></div>
+    <div class="badge">vacancia <b>${vm.n_molecules} H\u2082O &middot; ${vm.n_atoms} at.</b></div>
+    <div class="badge">removidas <b>${pm.n_molecules - vm.n_molecules} mol.</b></div>
+  `;
+  document.getElementById('meta-pf').textContent =
+    `${pm.n_atoms} atomos \u00b7 ${pm.n_molecules} H\u2082O`;
+  document.getElementById('meta-vc').textContent =
+    `${vm.n_atoms} atomos \u00b7 ${vm.n_molecules} H\u2082O`;
+}
+
+// ── Init ───────────────────────────────────────────────────────────────────
+function init() {
+  let data;
+  try {
+    const raw = document.getElementById('crystal-data').textContent;
+    data = JSON.parse(raw);
+  } catch(e) {
+    document.getElementById('loading').innerHTML = `
+      <div class="err-box">
+        <h3>Dados nao encontrados</h3>
+        <p>Execute o script Python para gerar este arquivo:</p>
+        <code>python scripts/generate_visualizer.py</code>
+        <p style="margin-top:8px;font-size:9px;color:#4a6a88">Erro: ${e.message}</p>
+      </div>`;
+    return;
+  }
+
+  fillBadges(data);
+  renderPanel('plot-pf', 'pf', data.perfect, false);
+  renderPanel('plot-vc', 'vc', data.vacancy, true);
+
+  // Sincroniza cameras bidirecionalmente
+  syncCamera('plot-pf', 'plot-vc');
+  syncCamera('plot-vc', 'plot-pf');
+
+  document.getElementById('loading').style.display = 'none';
+}
+
+// Aguarda DOM e Plotly carregarem
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
+}
+</script>
+</body>
+</html>
+"""
