@@ -1,0 +1,13 @@
+LAMMPS (7 Feb 2024 - Update 1)
+OMP_NUM_THREADS environment is not set. Defaulting to 1 thread. (src/comm.cpp:98)
+  using 1 OpenMP thread(s) per MPI task
+# --------------------------------------------------------------
+#  LAMMPS input – mínima energia (V14.2)
+# --------------------------------------------------------------
+units           metal          # unidades compatíveis com o data.lammps gerado
+atom_style      full           # deve coincidir com o usado no data.lammps
+boundary        p p p          # condições periódicas (p = periodic)
+
+read_data       data.lammps    # arquivo criado por src/lammps_builder.py
+ERROR: Cannot open file data.lammps: No such file or directory (src/read_data.cpp:367)
+Last command: read_data       data.lammps    # arquivo criado por src/lammps_builder.py

@@ -1,0 +1,43 @@
+# --------------------------------------------------------------
+#  LAMMPS input – mínima energia (V14.2)
+# --------------------------------------------------------------
+units           metal          # unidades compatíveis com o data.lammps gerado
+atom_style      full           # deve coincidir com o usado no data.lammps
+boundary        p p p          # condições periódicas (p = periodic)
+
+# --------------------------------------------------------------
+#  Leitura da estrutura (define a caixa)
+# --------------------------------------------------------------
+read_data       data.lammps    # arquivo criado por src/lammps_builder.py
+
+# --------------------------------------------------------------
+#  Massas – DEPOIS da caixa estar definida
+# --------------------------------------------------------------
+mass            1 15.9994   # Oxigênio (tipo 1)
+mass            2 1.008     # Hidrogênio (tipo 2)
+
+# --------------------------------------------------------------
+#  Interações (exemplo genérico)
+# --------------------------------------------------------------
+pair_style      lj/cut 10.0
+pair_coeff      * * 0.1 3.0   # ε = 0.1 eV , σ = 3.0 Å (exemplo)
+
+# --------------------------------------------------------------
+#  Minimização
+# --------------------------------------------------------------
+min_style       cg
+minimize        1e-8 1e-8 5000 10000   # Etol, ftol, max_iter, max_eval
+
+# --------------------------------------------------------------
+#  Saídas
+# --------------------------------------------------------------
+thermo          100                     # frequência de impressão no log
+thermo_style    custom step etotal pe ke temp press
+
+# --- Grava o snapshot final em formato LAMMPS DATA (útil para inspeção) ---
+write_data      relaxed.data
+
+# --- Grava um dump de átomos **apenas** uma vez (após a minimização) ---
+write_dump      all atom dump.relaxed
+
+log             log.lammps
