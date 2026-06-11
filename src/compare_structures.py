@@ -17,6 +17,13 @@ Novidade V14.5.1:
         - displacements (lista de vetores [dx,dy,dz] por átomo)
         - total_displacement (soma das normas)
         - top10 (lista dos 10 maiores deslocamentos com índice, símbolo e valor)
+
+Novidade V14.5.2 (JSON expandido):
+    * build_report também inclui:
+        - initial_xyz
+        - relaxed_xyz
+        - displacements
+        - top10
 """
 
 from pathlib import Path
@@ -92,11 +99,28 @@ def compute_displacements(initial: Atoms, relaxed: Atoms) -> Dict:
 
 
 # ----------------------------------------------------------------------
-# Relatório JSON (mantido)
+# Relatório JSON (agora inclui os novos campos)
 # ----------------------------------------------------------------------
 def build_report(initial: Atoms, relaxed: Atoms) -> Dict:
-    """Constrói um dicionário contendo metadados e métricas de deslocamento."""
+    """
+    Constrói um dicionário JSON contendo metadados, métricas de deslocamento
+    e, a partir da V14.5.2, as informações estruturais adicionais solicitadas:
+
+        - ``initial_xyz``  : lista de coordenadas ``[x, y, z]`` da estrutura inicial.
+        - ``relaxed_xyz``  : lista de coordenadas ``[x, y, z]`` da estrutura relaxada.
+        - ``displacements``: vetor de deslocamento por átomo (já calculado por
+          ``compare_with_displacements``).
+        - ``top10``        : top‑10 átomos mais deslocados (também retornado por
+          ``compare_with_displacements``).
+
+    O dicionário continua sendo compatível com as versões anteriores –
+    as chaves ``initial``, ``relaxed`` e ``displacement`` permanecem intactas.
+    """
+    # Métricas tradicionais (average, maximum, per_atom)
     displacement_data = compute_displacements(initial, relaxed)
+
+    # Informações estruturais adicionais (V14.5.2)
+    extra = compare_with_displacements(initial, relaxed)
 
     report = {
         "initial": {
@@ -108,6 +132,11 @@ def build_report(initial: Atoms, relaxed: Atoms) -> Dict:
             "formula": relaxed.get_chemical_formula(),
         },
         "displacement": displacement_data,
+        # Campos novos requisitados pela V14.5.2
+        "initial_xyz": initial.get_positions().tolist(),
+        "relaxed_xyz": relaxed.get_positions().tolist(),
+        "displacements": extra["displacements"],
+        "top10": extra["top10"],
     }
     return report
 
@@ -121,7 +150,7 @@ def write_report(report: Dict, out_path: Union[str, Path]) -> None:
 
 
 # ----------------------------------------------------------------------
-# NOVA FUNÇÃO – V14.5.1
+# NOVA FUNÇÃO – V14.5.1 (mantida)
 # ----------------------------------------------------------------------
 def compare_with_displacements(initial: Atoms, relaxed: Atoms) -> Dict:
     """
