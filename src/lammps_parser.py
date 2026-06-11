@@ -32,9 +32,9 @@ def read_lammps_dump(
     dump_path : str | Path
         Caminho para o dump gerado por LAMMPS (ex.: ``lammps/dump.relaxed``).
     frame : int, optional
-        Índice do frame a ser lido.  ``-1`` (padrão) lê o **último**
-        frame – o dump da minimização possui apenas um, mas o parâmetro
-        garante robustez caso o usuário tenha vários frames.
+        Índice do frame a ser lido. ``-1`` (padrão) lê o **último** frame –
+        o dump da minimização possui apenas um, mas o parâmetro garante
+        robustez caso o usuário tenha vários frames.
 
     Returns
     -------
@@ -62,6 +62,26 @@ def read_lammps_dump(
         raise RuntimeError(
             f"Falha ao ler o dump LAMMPS '{dump_path}': {exc}"
         ) from exc
+
+    # ---------------------------------------------------------------
+    # Correção V14.4.1 – mapeamento químico explícito
+    # ---------------------------------------------------------------
+    # O dump contém somente a coluna ``type`` (inteiro).  O ASE,
+    # na ausência de coluna ``element``, tenta inferir o símbolo a
+    # partir da massa, o que pode gerar interpretações errôneas.
+    # Para garantir a correspondência correta, sobrescrevemos os
+    # símbolos usando o mapeamento **real** do nosso data.lammps:
+    #   tipo 1 → H (hidrogênio)
+    #   tipo 2 → O (oxigênio)
+    # Caso existam outros tipos, mantemos os símbolos originais.
+    if hasattr(atoms, "arrays") and "type" in atoms.arrays:
+        type_ids = atoms.arrays["type"].astype(int)
+        symbol_map = {1: "H", 2: "O"}          # <-- MAPEAMENTO CORRETO
+        new_symbols = [
+            symbol_map.get(t, atoms.get_chemical_symbols()[i])
+            for i, t in enumerate(type_ids)
+        ]
+        atoms.set_chemical_symbols(new_symbols)
 
     return atoms
 
