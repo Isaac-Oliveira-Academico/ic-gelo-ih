@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>IC Gelo Ih – Relatório de Relaxação Estrutural LAMMPS (v14.5.2)</title>
+    <style>
+        body {font-family: Arial, Helvetica, sans-serif; margin: 0; padding: 0; background:#fafafa; color:#333;}
+        .container {max-width: 960px; margin: 0 auto; padding: 20px;}
+        h1, h2 {text-align: center; margin-bottom: 0.5em;}
+        .panel {background:#fff; border:1px solid #ddd; border-radius:4px; padding:15px; margin-bottom:20px;}
+        .grid {display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:15px;}
+        .metric {font-size:0.9rem;}
+        .metric span {font-weight:bold; display:block; margin-top:4px;}
+        table {width:100%; border-collapse:collapse; margin-top:10px;}
+        th, td {border:1px solid #ccc; padding:8px; text-align:center;}
+        th {background:#e9e9e9;}
+        caption {font-weight:bold; margin-bottom:5px;}
+        #plot-initial, #plot-relaxed {height:400px; background:#f0f0f0; border:1px solid #ccc; border-radius:4px;}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>IC Gelo Ih</h1>
+        <h2>Relatório de Relaxação Estrutural LAMMPS</h2>
+        <p style="text-align:center; font-size:0.9rem;">Versão 14.5.2</p>
+
+        <!-- Painel de métricas -->
+        <div class="panel">
+            <h3>Métricas da Simulação</h3>
+            <div class="grid">
+                <div class="metric">
+                    Fórmula inicial
+                    <span>{{ initial.formula }}</span>
+                </div>
+                <div class="metric">
+                    Fórmula relaxada
+                    <span>{{ relaxed.formula }}</span>
+                </div>
+                <div class="metric">
+                    Nº de átomos (inicial)
+                    <span>{{ initial.n_atoms }}</span>
+                </div>
+                <div class="metric">
+                    Nº de átomos (relaxado)
+                    <span>{{ relaxed.n_atoms }}</span>
+                </div>
+                <div class="metric">
+                    Deslocamento médio (Å)
+                    <span>{{ displacement.average_displacement }}</span>
+                </div>
+                <div class="metric">
+                    Deslocamento máximo (Å)
+                    <span>{{ displacement.maximum_displacement }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Containers para visualizações futuras -->
+        <div class="panel">
+            <h3>Estrutura Inicial</h3>
+            <div id="plot-initial"></div>
+        </div>
+
+        <div class="panel">
+            <h3>Estrutura Relaxada</h3>
+            <div id="plot-relaxed"></div>
+        </div>
+
+        <!-- Tabela Top‑10 deslocamentos -->
+        <div class="panel">
+            <h3>Top‑10 Átomos com Maior Deslocamento</h3>
+            <table>
+                <caption>Ranking dos 10 maiores deslocamentos</caption>
+                <thead>
+                    <tr>
+                        <th>Índice</th>
+                        <th>Elemento</th>
+                        <th>Deslocamento (Å)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for atom in top10 %}
+                    <tr>
+                        <td>{{ atom.index }}</td>
+                        <td>{{ atom.symbol }}</td>
+                        <td>{{ atom.disp }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>
